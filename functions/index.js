@@ -1,4 +1,10 @@
 const functions = require('firebase-functions');
+const Telegraf = require('telegraf')
+let config = require('./env.json');
+
+if(Object.keys(functions.config()).length){
+  config = functions.config();
+}
 
 var path = require('path');
 var serviceAccount = require(path.join(__dirname, 'hologrambot-c845b-firebase-adminsdk-b65tj-34eaa21083.json'));
@@ -36,9 +42,10 @@ function getDateTime() {
 
 }
 
-const Telegraf = require('telegraf')
 
-const bot = new Telegraf('935743271:AAH_FkEs0Zzfm3MwXflAWHAkLuZbGH3ZEbc')
+
+const bot = new Telegraf(config.service.telegram_key);
+bot.start((ctx) => ctx.reply('Selamat Datang'))
 bot.command('hadir', (ctx) => {
   let username = ctx.from.username;
   let nama = ctx.from.first_name + " " + ctx.from.last_name; 
@@ -100,5 +107,8 @@ bot.command('cek', (ctx) => {
   });
 });
 
-bot.launch()
+//bot.launch()
+exports.helloBot = functions.https.onRequest(
+  (req, res) => bot.handleUpdate(req.body, res)
+)
 
